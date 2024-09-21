@@ -14,6 +14,7 @@ import (
 
 var (
 	ErrAlreadyExists   = errors.New("already exists")
+	ErrBadRouting      = errors.New("inconsistent mapping between route and handler (programmer error)")
 	ErrInconsistentIDs = errors.New("inconsistent IDs")
 	ErrNotFound        = errors.New("not found")
 )
@@ -31,6 +32,15 @@ func codeFrom(err error) int {
 	default:
 		return http.StatusInternalServerError
 	}
+}
+
+func decodeGetPostRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
+	vars := mux.Vars(r)
+	id, ok := vars["id"]
+	if !ok {
+		return nil, ErrBadRouting
+	}
+	return getPostRequest{ID: id}, nil
 }
 
 func decodeGetPostsRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
@@ -64,6 +74,12 @@ func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
 		httptransport.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
 		httptransport.ServerErrorEncoder(encodeError),
 	}
+	r.Methods("GET").Path("/v1/posts/{id}").Handler(httptransport.NewServer(
+		e.GetPostEndpoint,
+		decodeGetPostRequest,
+		encodeResponse,
+		options...,
+	))
 	r.Methods("GET").Path("/v1/posts").Handler(httptransport.NewServer(
 		e.GetPostsEndpoint,
 		decodeGetPostsRequest,

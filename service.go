@@ -18,6 +18,7 @@ type Post struct {
 }
 
 type Service interface {
+	GetPost(ctx context.Context, id string) (Post, error)
 	GetPosts(ctx context.Context) ([]Post, error)
 }
 
@@ -25,6 +26,15 @@ type dbService struct{}
 
 func NewDbService() Service {
 	return &dbService{}
+}
+
+func (s *dbService) GetPost(ctx context.Context, id string) (post Post, err error) {
+	post = Post{ID: id, Post: "Hi! This is my first post.", CreatedAt: time.Now().Unix(),
+		User: User{
+			ID:       "j99fjjjf",
+			Username: "alan388",
+		}}
+	return post, nil
 }
 
 func (s *dbService) GetPosts(ctx context.Context) (posts []Post, err error) {
