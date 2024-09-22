@@ -47,6 +47,14 @@ func decodeGetPostsRequest(_ context.Context, r *http.Request) (request interfac
 	return nil, nil
 }
 
+func decodePostPostRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
+	var req postPostRequest
+	if e := json.NewDecoder(r.Body).Decode(&req.Post); e != nil {
+		return nil, e
+	}
+	return req, nil
+}
+
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	if err == nil {
 		panic("encodeError with nil error")
@@ -83,6 +91,12 @@ func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
 	r.Methods("GET").Path("/v1/posts").Handler(httptransport.NewServer(
 		e.GetPostsEndpoint,
 		decodeGetPostsRequest,
+		encodeResponse,
+		options...,
+	))
+	r.Methods("POST").Path("/v1/posts").Handler(httptransport.NewServer(
+		e.PostPostEndpoint,
+		decodePostPostRequest,
 		encodeResponse,
 		options...,
 	))
