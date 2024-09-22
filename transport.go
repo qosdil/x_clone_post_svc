@@ -82,19 +82,21 @@ func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
 		httptransport.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
 		httptransport.ServerErrorEncoder(encodeError),
 	}
-	r.Methods("GET").Path("/v1/posts/{id}").Handler(httptransport.NewServer(
+	pathPrefix := "/posts"
+	v1Path := "/v1" + pathPrefix
+	r.Methods("GET").Path(v1Path + "/{id}").Handler(httptransport.NewServer(
 		e.GetPostEndpoint,
 		decodeGetPostRequest,
 		encodeResponse,
 		options...,
 	))
-	r.Methods("GET").Path("/v1/posts").Handler(httptransport.NewServer(
+	r.Methods("GET").Path(v1Path).Handler(httptransport.NewServer(
 		e.GetPostsEndpoint,
 		decodeGetPostsRequest,
 		encodeResponse,
 		options...,
 	))
-	r.Methods("POST").Path("/v1/posts").Handler(httptransport.NewServer(
+	r.Methods("POST").Path(v1Path).Handler(httptransport.NewServer(
 		e.PostPostEndpoint,
 		decodePostPostRequest,
 		encodeResponse,
