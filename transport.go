@@ -85,7 +85,7 @@ func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
 	pathPrefix := "/posts"
 	v1Path := "/v1" + pathPrefix
 	r.Methods("GET").Path(v1Path + "/{id}").Handler(httptransport.NewServer(
-		e.GetPostEndpoint,
+		e.GetEndpoint,
 		decodeGetPostRequest,
 		encodeResponse,
 		options...,
