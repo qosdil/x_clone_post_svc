@@ -26,11 +26,11 @@ func (mw loggingMiddleware) GetList(ctx context.Context) (posts []Post, err erro
 	return mw.next.GetList(ctx)
 }
 
-func (mw loggingMiddleware) PostPost(ctx context.Context, post Post) (Post, error) {
+func (mw loggingMiddleware) Post(ctx context.Context, post Post) (Post, error) {
 	defer func(begin time.Time) {
-		mw.logger.Log("method", "PostPost", "took", time.Since(begin), "err", nil)
+		mw.logger.Log("method", "Post", "took", time.Since(begin), "err", nil)
 	}(time.Now())
-	return mw.next.PostPost(ctx, post)
+	return mw.next.Post(ctx, post)
 }
 
 type Middleware func(Service) Service

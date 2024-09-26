@@ -47,8 +47,8 @@ func decodeGetListRequest(_ context.Context, r *http.Request) (request interface
 	return nil, nil
 }
 
-func decodePostPostRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
-	var req postPostRequest
+func decodePostRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
+	var req postRequest
 	if e := json.NewDecoder(r.Body).Decode(&req.Post); e != nil {
 		return nil, e
 	}
@@ -97,8 +97,8 @@ func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
 		options...,
 	))
 	r.Methods("POST").Path(v1Path).Handler(httptransport.NewServer(
-		e.PostPostEndpoint,
-		decodePostPostRequest,
+		e.PostEndpoint,
+		decodePostRequest,
 		encodeResponse,
 		options...,
 	))

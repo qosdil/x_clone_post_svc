@@ -7,7 +7,7 @@ import (
 type Service interface {
 	Get(ctx context.Context, id string) (Post, error)
 	GetList(ctx context.Context) ([]Post, error)
-	PostPost(ctx context.Context, post Post) (Post, error)
+	Post(ctx context.Context, post Post) (Post, error)
 }
 
 type service struct {
@@ -30,7 +30,7 @@ func (s *service) GetList(ctx context.Context) (posts []Post, err error) {
 	return s.repo.Find(ctx)
 }
 
-func (s *service) PostPost(ctx context.Context, post Post) (Post, error) {
+func (s *service) Post(ctx context.Context, post Post) (Post, error) {
 	post, err := s.repo.Create(ctx, post)
 	if err != nil {
 		return post, err
