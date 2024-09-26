@@ -8,7 +8,7 @@ import (
 
 type Endpoints struct {
 	GetPostEndpoint  endpoint.Endpoint
-	GetPostsEndpoint endpoint.Endpoint
+	GetListEndpoint  endpoint.Endpoint
 	PostPostEndpoint endpoint.Endpoint
 }
 
@@ -21,7 +21,7 @@ type getPostResponse struct {
 	Err  error `json:"err,omitempty"`
 }
 
-type getPostsResponse struct {
+type getListResponse struct {
 	Posts []Post `json:"posts,omitempty"`
 	Err   error  `json:"err,omitempty"`
 }
@@ -43,10 +43,10 @@ func MakeGetPostEndpoint(s Service) endpoint.Endpoint {
 	}
 }
 
-func MakeGetPostsEndpoint(s Service) endpoint.Endpoint {
+func MakeGetListEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		p, e := s.GetPosts(ctx)
-		return getPostsResponse{Posts: p, Err: e}, nil
+		p, e := s.GetList(ctx)
+		return getListResponse{Posts: p, Err: e}, nil
 	}
 }
 
@@ -61,7 +61,7 @@ func MakePostPostEndpoint(s Service) endpoint.Endpoint {
 func MakeServerEndpoints(s Service) Endpoints {
 	return Endpoints{
 		GetPostEndpoint:  MakeGetPostEndpoint(s),
-		GetPostsEndpoint: MakeGetPostsEndpoint(s),
+		GetListEndpoint:  MakeGetListEndpoint(s),
 		PostPostEndpoint: MakePostPostEndpoint(s),
 	}
 }
