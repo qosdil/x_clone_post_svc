@@ -21,7 +21,7 @@ type getPostResponse struct {
 	Err  error `json:"err,omitempty"`
 }
 
-type getListResponse struct {
+type listResponse struct {
 	Posts []Post `json:"posts,omitempty"`
 	Err   error  `json:"err,omitempty"`
 }
@@ -46,7 +46,7 @@ func MakeGetEndpoint(s Service) endpoint.Endpoint {
 func MakeListEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		p, e := s.GetList(ctx)
-		return getListResponse{Posts: p, Err: e}, nil
+		return listResponse{Posts: p, Err: e}, nil
 	}
 }
 
