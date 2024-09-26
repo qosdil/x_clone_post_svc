@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"net/http"
@@ -8,13 +9,30 @@ import (
 	"os/signal"
 	"syscall"
 	app "x_clone_post_srv"
+	config "x_clone_post_srv/config"
 
 	"github.com/go-kit/log"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
+	// Load environment variables
+	config.LoadEnv()
+
+	// Set up MongoDB connection
+	mongoURI := config.GetEnv("MONGODB_URI")
+	clientOptions := options.Client().ApplyURI(mongoURI)
+	client, err := mongo.Connect(context.TODO(), clientOptions)
+	if err != nil {
+		panic(err)
+	}
+	defer client.Disconnect(context.TODO())
+
+	db := client.Database(config.GetEnv("DB_NAME"))
+	repo := app.NewMongoRepository(db)
 	var (
-		httpAddr = flag.String("http.addr", ":8080", "HTTP listen address")
+		httpAddr = flag.String("http.addr", ":"+config.GetEnv("PORT"), "HTTP listen address")
 	)
 	flag.Parse()
 
@@ -27,7 +45,7 @@ func main() {
 
 	var s app.Service
 	{
-		s = app.NewDbService()
+		s = app.NewService(repo)
 		s = app.LoggingMiddleware(logger)(s)
 	}
 
