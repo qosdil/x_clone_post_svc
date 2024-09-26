@@ -7,9 +7,9 @@ import (
 )
 
 type Endpoints struct {
-	GetEndpoint     endpoint.Endpoint
-	GetListEndpoint endpoint.Endpoint
-	PostEndpoint    endpoint.Endpoint
+	GetEndpoint  endpoint.Endpoint
+	ListEndpoint endpoint.Endpoint
+	PostEndpoint endpoint.Endpoint
 }
 
 type getPostRequest struct {
@@ -43,7 +43,7 @@ func MakeGetEndpoint(s Service) endpoint.Endpoint {
 	}
 }
 
-func MakeGetListEndpoint(s Service) endpoint.Endpoint {
+func MakeListEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		p, e := s.GetList(ctx)
 		return getListResponse{Posts: p, Err: e}, nil
@@ -60,8 +60,8 @@ func MakePostEndpoint(s Service) endpoint.Endpoint {
 
 func MakeServerEndpoints(s Service) Endpoints {
 	return Endpoints{
-		GetEndpoint:     MakeGetEndpoint(s),
-		GetListEndpoint: MakeGetListEndpoint(s),
-		PostEndpoint:    MakePostEndpoint(s),
+		GetEndpoint:  MakeGetEndpoint(s),
+		ListEndpoint: MakeListEndpoint(s),
+		PostEndpoint: MakePostEndpoint(s),
 	}
 }

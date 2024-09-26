@@ -91,7 +91,7 @@ func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
 		options...,
 	))
 	r.Methods("GET").Path(v1Path).Handler(httptransport.NewServer(
-		e.GetListEndpoint,
+		e.ListEndpoint,
 		decodeGetListRequest,
 		encodeResponse,
 		options...,
