@@ -31,7 +31,8 @@ type postPostRequest struct {
 }
 
 type postPostResponse struct {
-	Err error `json:"err,omitempty"`
+	Post Post  `json:"post,omitempty"`
+	Err  error `json:"err,omitempty"`
 }
 
 func MakeGetPostEndpoint(s Service) endpoint.Endpoint {
@@ -52,8 +53,8 @@ func MakeGetPostsEndpoint(s Service) endpoint.Endpoint {
 func MakePostPostEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(postPostRequest)
-		e := s.PostPost(ctx, req.Post)
-		return postPostResponse{Err: e}, nil
+		p, e := s.PostPost(ctx, req.Post)
+		return postPostResponse{Post: p, Err: e}, nil
 	}
 }
 

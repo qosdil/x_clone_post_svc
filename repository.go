@@ -10,6 +10,7 @@ import (
 )
 
 type Repository interface {
+	Create(ctx context.Context, post Post) (Post, error)
 	Find(ctx context.Context) ([]Post, error)
 	FindByID(ctx context.Context, id string) (Post, error)
 }
@@ -22,6 +23,16 @@ func NewMongoRepository(db *mongo.Database) Repository {
 	return &mongoRepository{
 		coll: db.Collection("posts"),
 	}
+}
+
+func (r *mongoRepository) Create(ctx context.Context, post Post) (Post, error) {
+	result, err := r.coll.InsertOne(ctx, post)
+	if err != nil {
+		return post, err
+	}
+	insertedID, _ := result.InsertedID.(primitive.ObjectID)
+	post.ID = insertedID
+	return post, nil
 }
 
 func (r *mongoRepository) Find(ctx context.Context) (posts []Post, err error) {

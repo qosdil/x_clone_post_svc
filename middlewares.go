@@ -26,9 +26,9 @@ func (mw loggingMiddleware) GetPosts(ctx context.Context) (posts []Post, err err
 	return mw.next.GetPosts(ctx)
 }
 
-func (mw loggingMiddleware) PostPost(ctx context.Context, post Post) (err error) {
+func (mw loggingMiddleware) PostPost(ctx context.Context, post Post) (Post, error) {
 	defer func(begin time.Time) {
-		mw.logger.Log("method", "PostPost", "took", time.Since(begin), "err", err)
+		mw.logger.Log("method", "PostPost", "took", time.Since(begin), "err", nil)
 	}(time.Now())
 	return mw.next.PostPost(ctx, post)
 }
