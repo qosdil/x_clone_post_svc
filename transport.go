@@ -34,13 +34,13 @@ func codeFrom(err error) int {
 	}
 }
 
-func decodeGetPostRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
+func decodeGetRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
 	vars := mux.Vars(r)
 	id, ok := vars["id"]
 	if !ok {
 		return nil, ErrBadRouting
 	}
-	return getPostRequest{ID: id}, nil
+	return getRequest{ID: id}, nil
 }
 
 func decodeGetListRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
@@ -86,7 +86,7 @@ func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
 	v1Path := "/v1" + pathPrefix
 	r.Methods("GET").Path(v1Path + "/{id}").Handler(httptransport.NewServer(
 		e.GetEndpoint,
-		decodeGetPostRequest,
+		decodeGetRequest,
 		encodeResponse,
 		options...,
 	))
