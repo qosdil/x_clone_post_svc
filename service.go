@@ -5,7 +5,7 @@ import (
 )
 
 type Service interface {
-	GetPost(ctx context.Context, id string) (Post, error)
+	Get(ctx context.Context, id string) (Post, error)
 	GetPosts(ctx context.Context) ([]Post, error)
 	PostPost(ctx context.Context, post Post) (Post, error)
 }
@@ -18,7 +18,7 @@ func NewService(repo Repository) Service {
 	return &service{repo: repo}
 }
 
-func (s *service) GetPost(ctx context.Context, id string) (post Post, err error) {
+func (s *service) Get(ctx context.Context, id string) (post Post, err error) {
 	post, err = s.repo.FindByID(ctx, id)
 	if err != nil {
 		return post, err

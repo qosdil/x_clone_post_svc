@@ -12,11 +12,11 @@ type loggingMiddleware struct {
 	logger log.Logger
 }
 
-func (mw loggingMiddleware) GetPost(ctx context.Context, id string) (post Post, err error) {
+func (mw loggingMiddleware) Get(ctx context.Context, id string) (post Post, err error) {
 	defer func(begin time.Time) {
-		mw.logger.Log("method", "GetPost", "id", id, "took", time.Since(begin), "err", err)
+		mw.logger.Log("method", "Get", "id", id, "took", time.Since(begin), "err", err)
 	}(time.Now())
-	return mw.next.GetPost(ctx, id)
+	return mw.next.Get(ctx, id)
 }
 
 func (mw loggingMiddleware) GetPosts(ctx context.Context) (posts []Post, err error) {

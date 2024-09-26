@@ -38,7 +38,7 @@ type postPostResponse struct {
 func MakeGetPostEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(getPostRequest)
-		p, e := s.GetPost(ctx, req.ID)
+		p, e := s.Get(ctx, req.ID)
 		return getPostResponse{Post: p, Err: e}, nil
 	}
 }
