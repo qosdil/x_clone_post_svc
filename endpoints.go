@@ -16,7 +16,7 @@ type getRequest struct {
 	ID string
 }
 
-type getPostResponse struct {
+type getResponse struct {
 	Post Post  `json:"post,omitempty"`
 	Err  error `json:"err,omitempty"`
 }
@@ -39,7 +39,7 @@ func MakeGetEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(getRequest)
 		p, e := s.Get(ctx, req.ID)
-		return getPostResponse{Post: p, Err: e}, nil
+		return getResponse{Post: p, Err: e}, nil
 	}
 }
 
