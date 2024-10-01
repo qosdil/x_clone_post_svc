@@ -17,13 +17,13 @@ type getRequest struct {
 }
 
 type getResponse struct {
-	Post Post  `json:"post,omitempty"`
-	Err  error `json:"err,omitempty"`
+	Post PostResponse `json:"post,omitempty"`
+	Err  error        `json:"err,omitempty"`
 }
 
 type listResponse struct {
-	Posts []Post `json:"posts,omitempty"`
-	Err   error  `json:"err,omitempty"`
+	Posts []PostResponse `json:"posts,omitempty"`
+	Err   error          `json:"err,omitempty"`
 }
 
 type postRequest struct {
@@ -31,8 +31,8 @@ type postRequest struct {
 }
 
 type postResponse struct {
-	Post Post  `json:"post,omitempty"`
-	Err  error `json:"err,omitempty"`
+	Post PostResponse `json:"post,omitempty"`
+	Err  error        `json:"err,omitempty"`
 }
 
 func MakeGetEndpoint(s Service) endpoint.Endpoint {

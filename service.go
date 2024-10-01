@@ -5,9 +5,9 @@ import (
 )
 
 type Service interface {
-	Get(ctx context.Context, id string) (Post, error)
-	GetList(ctx context.Context) ([]Post, error)
-	Post(ctx context.Context, post Post) (Post, error)
+	Get(ctx context.Context, id string) (PostResponse, error)
+	GetList(ctx context.Context) ([]PostResponse, error)
+	Post(ctx context.Context, post Post) (PostResponse, error)
 }
 
 type service struct {
@@ -18,22 +18,36 @@ func NewService(repo Repository) Service {
 	return &service{repo: repo}
 }
 
-func (s *service) Get(ctx context.Context, id string) (post Post, err error) {
-	post, err = s.repo.FindByID(ctx, id)
+func (s *service) Get(ctx context.Context, id string) (PostResponse, error) {
+	post, err := s.repo.FindByID(ctx, id)
 	if err != nil {
-		return post, err
+		return PostResponse{}, err
 	}
-	return post, nil
+	return PostResponse{
+		ID:        post.ID.Hex(),
+		Content:   post.Content,
+		CreatedAt: post.CreatedAt.T,
+		User: User{
+			ID: post.UserID.Hex(),
+		},
+	}, nil
 }
 
-func (s *service) GetList(ctx context.Context) (posts []Post, err error) {
+func (s *service) GetList(ctx context.Context) (postReponses []PostResponse, err error) {
 	return s.repo.Find(ctx)
 }
 
-func (s *service) Post(ctx context.Context, post Post) (Post, error) {
+func (s *service) Post(ctx context.Context, post Post) (PostResponse, error) {
 	post, err := s.repo.Create(ctx, post)
 	if err != nil {
-		return post, err
+		return PostResponse{}, err
 	}
-	return post, nil
+	return PostResponse{
+		ID:        post.ID.Hex(),
+		Content:   post.Content,
+		CreatedAt: post.CreatedAt.T,
+		User: User{
+			ID: post.UserID.Hex(),
+		},
+	}, nil
 }

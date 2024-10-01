@@ -3,6 +3,7 @@ package x_clone_post_srv
 import (
 	"context"
 	"errors"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,7 +12,7 @@ import (
 
 type Repository interface {
 	Create(ctx context.Context, post Post) (Post, error)
-	Find(ctx context.Context) ([]Post, error)
+	Find(ctx context.Context) ([]PostResponse, error)
 	FindByID(ctx context.Context, id string) (Post, error)
 }
 
@@ -26,6 +27,7 @@ func NewMongoRepository(db *mongo.Database) Repository {
 }
 
 func (r *mongoRepository) Create(ctx context.Context, post Post) (Post, error) {
+	post.CreatedAt = primitive.Timestamp{T: uint32(time.Now().Unix())}
 	result, err := r.coll.InsertOne(ctx, post)
 	if err != nil {
 		return post, err
@@ -35,7 +37,7 @@ func (r *mongoRepository) Create(ctx context.Context, post Post) (Post, error) {
 	return post, nil
 }
 
-func (r *mongoRepository) Find(ctx context.Context) (posts []Post, err error) {
+func (r *mongoRepository) Find(ctx context.Context) (postResponses []PostResponse, err error) {
 	cursor, err := r.coll.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
@@ -47,14 +49,21 @@ func (r *mongoRepository) Find(ctx context.Context) (posts []Post, err error) {
 		if err := cursor.Decode(&post); err != nil {
 			return nil, err
 		}
-		posts = append(posts, post)
+		postResponses = append(postResponses, PostResponse{
+			ID:        post.ID.Hex(),
+			Content:   post.Content,
+			CreatedAt: post.CreatedAt.T,
+			User: User{
+				ID: post.UserID.Hex(),
+			},
+		})
 	}
 
 	if err := cursor.Err(); err != nil {
 		return nil, err
 	}
 
-	return posts, nil
+	return postResponses, nil
 }
 
 func (r *mongoRepository) FindByID(ctx context.Context, id string) (post Post, err error) {
