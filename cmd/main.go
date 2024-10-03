@@ -8,8 +8,8 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	app "x_clone_post_srv"
-	config "x_clone_post_srv/config"
+	app "x_clone_post_svc"
+	config "x_clone_post_svc/config"
 
 	"github.com/go-kit/log"
 	"go.mongodb.org/mongo-driver/mongo"

@@ -1,4 +1,4 @@
-module x_clone_post_srv
+module x_clone_post_svc
 
 go 1.22.3
 
