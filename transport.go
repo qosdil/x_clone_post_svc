@@ -89,6 +89,7 @@ func encodeResponse(ctx context.Context, w http.ResponseWriter, response interfa
 	return json.NewEncoder(w).Encode(response)
 }
 
+// TODO move this functionality to API gateway x Auth svc
 // jwtAuthMiddleware is a middleware to validate the JWT token
 func jwtAuthMiddleware(secret string) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
