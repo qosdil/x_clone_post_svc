@@ -5,11 +5,19 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
+	"x_clone_post_svc/config"
 
 	"github.com/go-kit/kit/transport"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/go-kit/log"
+	"github.com/golang-jwt/jwt"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+const (
+	httpStatusUnauthorizedMessage = "Unauthorized"
 )
 
 var (
@@ -47,8 +55,14 @@ func decodeGetListRequest(_ context.Context, r *http.Request) (request interface
 	return nil, nil
 }
 
-func decodePostRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
+func decodePostRequest(ctx context.Context, r *http.Request) (request interface{}, err error) {
 	var req postRequest
+
+	// Extract the validated JWT user ID from auth middleware
+	userIDStr, _ := ctx.Value("user_id").(string)
+	userID, _ := primitive.ObjectIDFromHex(userIDStr)
+
+	req.Post.UserID = userID
 	if e := json.NewDecoder(r.Body).Decode(&req.Post); e != nil {
 		return nil, e
 	}
@@ -75,6 +89,55 @@ func encodeResponse(ctx context.Context, w http.ResponseWriter, response interfa
 	return json.NewEncoder(w).Encode(response)
 }
 
+// jwtAuthMiddleware is a middleware to validate the JWT token
+func jwtAuthMiddleware(secret string) mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			tokenString := r.Header.Get("Authorization")
+			if tokenString == "" {
+				http.Error(w, httpStatusUnauthorizedMessage, http.StatusUnauthorized)
+				return
+			}
+
+			// Split the token to get the Bearer part
+			tokenParts := strings.Split(tokenString, " ")
+			if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
+				http.Error(w, httpStatusUnauthorizedMessage, http.StatusUnauthorized)
+				return
+			}
+			tokenString = tokenParts[1]
+
+			// Parse the token
+			token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+					return nil, nil
+				}
+				return []byte(secret), nil
+			})
+
+			if err != nil || !token.Valid {
+				http.Error(w, httpStatusUnauthorizedMessage, http.StatusUnauthorized)
+				return
+			}
+
+			claims, ok := token.Claims.(jwt.MapClaims)
+			if !ok || !token.Valid {
+				http.Error(w, httpStatusUnauthorizedMessage, http.StatusUnauthorized)
+				return
+			}
+
+			// Set user ID in context
+			userID, ok := claims["user_id"].(string)
+			if !ok {
+				http.Error(w, "invalid user ID in token", http.StatusUnauthorized)
+				return
+			}
+			ctx := context.WithValue(r.Context(), "user_id", userID)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
 func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
 	r := mux.NewRouter()
 	e := MakeServerEndpoints(s)
@@ -96,11 +159,11 @@ func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
 		encodeResponse,
 		options...,
 	))
-	r.Methods("POST").Path(v1Path).Handler(httptransport.NewServer(
+	r.Handle(v1Path, jwtAuthMiddleware(config.GetEnv("JWT_SECRET"))(httptransport.NewServer(
 		e.PostEndpoint,
 		decodePostRequest,
 		encodeResponse,
 		options...,
-	))
+	))).Methods("POST")
 	return r
 }
