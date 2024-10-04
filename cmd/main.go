@@ -9,7 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 	app "x_clone_post_svc"
-	config "x_clone_post_svc/config"
+	configs "x_clone_post_svc/configs"
 
 	"github.com/go-kit/log"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -18,10 +18,10 @@ import (
 
 func main() {
 	// Load environment variables
-	config.LoadEnv()
+	configs.LoadEnv()
 
 	// Set up MongoDB connection
-	mongoURI := config.GetEnv("MONGODB_URI")
+	mongoURI := configs.GetEnv("MONGODB_URI")
 	clientOptions := options.Client().ApplyURI(mongoURI)
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
@@ -29,10 +29,10 @@ func main() {
 	}
 	defer client.Disconnect(context.TODO())
 
-	db := client.Database(config.GetEnv("DB_NAME"))
+	db := client.Database(configs.GetEnv("DB_NAME"))
 	repo := app.NewMongoRepository(db)
 	var (
-		httpAddr = flag.String("http.addr", ":"+config.GetEnv("PORT"), "HTTP listen address")
+		httpAddr = flag.String("http.addr", ":"+configs.GetEnv("PORT"), "HTTP listen address")
 	)
 	flag.Parse()
 

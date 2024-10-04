@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"x_clone_post_svc/config"
+	"x_clone_post_svc/configs"
 
 	"github.com/go-kit/kit/transport"
 	httptransport "github.com/go-kit/kit/transport/http"
@@ -108,7 +108,7 @@ func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
 		encodeResponse,
 		options...,
 	))
-	r.Handle(v1Path, jwtAuthMiddleware(config.GetEnv("JWT_SECRET"))(httptransport.NewServer(
+	r.Handle(v1Path, jwtAuthMiddleware(configs.GetEnv("JWT_SECRET"))(httptransport.NewServer(
 		e.PostEndpoint,
 		decodePostRequest,
 		encodeResponse,
