@@ -19,7 +19,7 @@ func NewService(repo Repository) Service {
 }
 
 func (s *service) GetByID(ctx context.Context, id string) (PostResponse, error) {
-	post, err := s.repo.FindByID(ctx, id)
+	post, err := s.repo.FirstByID(ctx, id)
 	if err != nil {
 		return PostResponse{}, err
 	}

@@ -10,10 +10,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// Repository follows gORM convention for the method namings
 type Repository interface {
 	Create(ctx context.Context, post Post) (Post, error)
 	Find(ctx context.Context) ([]PostResponse, error)
-	FindByID(ctx context.Context, id string) (Post, error)
+	FirstByID(ctx context.Context, id string) (Post, error)
 }
 
 type mongoRepository struct {
@@ -66,7 +67,7 @@ func (r *mongoRepository) Find(ctx context.Context) (postResponses []PostRespons
 	return postResponses, nil
 }
 
-func (r *mongoRepository) FindByID(ctx context.Context, id string) (post Post, err error) {
+func (r *mongoRepository) FirstByID(ctx context.Context, id string) (post Post, err error) {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return post, err
