@@ -23,11 +23,11 @@ func (mw loggingMiddleware) GetByID(ctx context.Context, id string) (postRespons
 	return mw.next.GetByID(ctx, id)
 }
 
-func (mw loggingMiddleware) GetList(ctx context.Context) (posts []PostResponse, err error) {
+func (mw loggingMiddleware) List(ctx context.Context) (posts []PostResponse, err error) {
 	defer func(begin time.Time) {
-		mw.logger.Log("method", "GetList", "took", time.Since(begin), "err", err)
+		mw.logger.Log("method", "List", "took", time.Since(begin), "err", err)
 	}(time.Now())
-	return mw.next.GetList(ctx)
+	return mw.next.List(ctx)
 }
 
 func (mw loggingMiddleware) Post(ctx context.Context, post Post) (PostResponse, error) {

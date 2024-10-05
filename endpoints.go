@@ -45,7 +45,7 @@ func MakeGetByIDEndpoint(s Service) endpoint.Endpoint {
 
 func MakeListEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		p, e := s.GetList(ctx)
+		p, e := s.List(ctx)
 		return listResponse{Posts: p, Err: e}, nil
 	}
 }
