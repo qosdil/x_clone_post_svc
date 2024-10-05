@@ -51,10 +51,10 @@ func MakeListEndpoint(s Service) endpoint.Endpoint {
 	}
 }
 
-func MakePostEndpoint(s Service) endpoint.Endpoint {
+func MakeCreateEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(postRequest)
-		p, e := s.Post(ctx, Post{
+		p, e := s.Create(ctx, Post{
 			Content: req.Content,
 			User: User{
 				ID: req.UserID,
@@ -68,6 +68,6 @@ func MakeServerEndpoints(s Service) Endpoints {
 	return Endpoints{
 		GetByIDEndpoint: MakeGetByIDEndpoint(s),
 		ListEndpoint:    MakeListEndpoint(s),
-		PostEndpoint:    MakePostEndpoint(s),
+		PostEndpoint:    MakeCreateEndpoint(s),
 	}
 }

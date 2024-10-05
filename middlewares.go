@@ -16,6 +16,13 @@ type loggingMiddleware struct {
 	logger log.Logger
 }
 
+func (mw loggingMiddleware) Create(ctx context.Context, post Post) (Post, error) {
+	defer func(begin time.Time) {
+		mw.logger.Log("method", "Create", "took", time.Since(begin), "err", nil)
+	}(time.Now())
+	return mw.next.Create(ctx, post)
+}
+
 func (mw loggingMiddleware) GetByID(ctx context.Context, id string) (postResponse Post, err error) {
 	defer func(begin time.Time) {
 		mw.logger.Log("method", "GetByID", "id", id, "took", time.Since(begin), "err", err)
@@ -28,13 +35,6 @@ func (mw loggingMiddleware) List(ctx context.Context) (posts []Post, err error) 
 		mw.logger.Log("method", "List", "took", time.Since(begin), "err", err)
 	}(time.Now())
 	return mw.next.List(ctx)
-}
-
-func (mw loggingMiddleware) Post(ctx context.Context, post Post) (Post, error) {
-	defer func(begin time.Time) {
-		mw.logger.Log("method", "Post", "took", time.Since(begin), "err", nil)
-	}(time.Now())
-	return mw.next.Post(ctx, post)
 }
 
 type Middleware func(Service) Service

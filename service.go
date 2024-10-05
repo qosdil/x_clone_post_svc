@@ -5,9 +5,9 @@ import (
 )
 
 type Service interface {
+	Create(ctx context.Context, post Post) (Post, error)
 	GetByID(ctx context.Context, id string) (Post, error)
 	List(ctx context.Context) ([]Post, error)
-	Post(ctx context.Context, post Post) (Post, error)
 }
 
 type service struct {
@@ -18,15 +18,14 @@ func NewService(repo Repository) Service {
 	return &service{repo: repo}
 }
 
+func (s *service) Create(ctx context.Context, post Post) (Post, error) {
+	return s.repo.Create(ctx, post)
+}
+
 func (s *service) GetByID(ctx context.Context, id string) (Post, error) {
 	return s.repo.FirstByID(ctx, id)
 }
 
 func (s *service) List(ctx context.Context) ([]Post, error) {
 	return s.repo.Find(ctx)
-}
-
-// TODO Change to Create(), follows the conventions of X API
-func (s *service) Post(ctx context.Context, post Post) (Post, error) {
-	return s.repo.Create(ctx, post)
 }
