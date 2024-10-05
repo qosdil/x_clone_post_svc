@@ -5,9 +5,9 @@ import (
 )
 
 type Service interface {
-	GetByID(ctx context.Context, id string) (PostResponse, error)
-	List(ctx context.Context) ([]PostResponse, error)
-	Post(ctx context.Context, post Post) (PostResponse, error)
+	GetByID(ctx context.Context, id string) (Post, error)
+	List(ctx context.Context) ([]Post, error)
+	Post(ctx context.Context, post Post) (Post, error)
 }
 
 type service struct {
@@ -18,36 +18,15 @@ func NewService(repo Repository) Service {
 	return &service{repo: repo}
 }
 
-func (s *service) GetByID(ctx context.Context, id string) (PostResponse, error) {
-	post, err := s.repo.FirstByID(ctx, id)
-	if err != nil {
-		return PostResponse{}, err
-	}
-	return PostResponse{
-		ID:        post.ID.Hex(),
-		Content:   post.Content,
-		CreatedAt: post.CreatedAt.T,
-		User: User{
-			ID: post.UserID.Hex(),
-		},
-	}, nil
+func (s *service) GetByID(ctx context.Context, id string) (Post, error) {
+	return s.repo.FirstByID(ctx, id)
 }
 
-func (s *service) List(ctx context.Context) (postReponses []PostResponse, err error) {
+func (s *service) List(ctx context.Context) ([]Post, error) {
 	return s.repo.Find(ctx)
 }
 
-func (s *service) Post(ctx context.Context, post Post) (PostResponse, error) {
-	post, err := s.repo.Create(ctx, post)
-	if err != nil {
-		return PostResponse{}, err
-	}
-	return PostResponse{
-		ID:        post.ID.Hex(),
-		Content:   post.Content,
-		CreatedAt: post.CreatedAt.T,
-		User: User{
-			ID: post.UserID.Hex(),
-		},
-	}, nil
+// TODO Change to Create(), follows the conventions of X API
+func (s *service) Post(ctx context.Context, post Post) (Post, error) {
+	return s.repo.Create(ctx, post)
 }

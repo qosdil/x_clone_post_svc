@@ -11,7 +11,6 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/go-kit/log"
 	"github.com/gorilla/mux"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const (
@@ -57,11 +56,10 @@ func decodePostRequest(ctx context.Context, r *http.Request) (request interface{
 	var req postRequest
 
 	// Extract the validated JWT user ID from auth middleware
-	userIDStr, _ := ctx.Value("user_id").(string)
-	userID, _ := primitive.ObjectIDFromHex(userIDStr)
+	userID, _ := ctx.Value("user_id").(string)
 
-	req.Post.UserID = userID
-	if e := json.NewDecoder(r.Body).Decode(&req.Post); e != nil {
+	req.UserID = userID
+	if e := json.NewDecoder(r.Body).Decode(&req); e != nil {
 		return nil, e
 	}
 	return req, nil

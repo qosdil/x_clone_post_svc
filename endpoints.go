@@ -17,22 +17,23 @@ type getRequest struct {
 }
 
 type getResponse struct {
-	Post PostResponse `json:"post,omitempty"`
-	Err  error        `json:"err,omitempty"`
+	Post Post  `json:"post,omitempty"`
+	Err  error `json:"err,omitempty"`
 }
 
 type listResponse struct {
-	Posts []PostResponse `json:"posts,omitempty"`
-	Err   error          `json:"err,omitempty"`
+	Posts []Post `json:"posts,omitempty"`
+	Err   error  `json:"err,omitempty"`
 }
 
 type postRequest struct {
-	Post Post
+	Content string `json:"content"`
+	UserID  string `json:"user_id"`
 }
 
 type postResponse struct {
-	Post PostResponse `json:"post,omitempty"`
-	Err  error        `json:"err,omitempty"`
+	Post Post  `json:"post,omitempty"`
+	Err  error `json:"err,omitempty"`
 }
 
 func MakeGetByIDEndpoint(s Service) endpoint.Endpoint {
@@ -53,7 +54,12 @@ func MakeListEndpoint(s Service) endpoint.Endpoint {
 func MakePostEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(postRequest)
-		p, e := s.Post(ctx, req.Post)
+		p, e := s.Post(ctx, Post{
+			Content: req.Content,
+			User: User{
+				ID: req.UserID,
+			},
+		})
 		return postResponse{Post: p, Err: e}, nil
 	}
 }

@@ -16,21 +16,21 @@ type loggingMiddleware struct {
 	logger log.Logger
 }
 
-func (mw loggingMiddleware) GetByID(ctx context.Context, id string) (postResponse PostResponse, err error) {
+func (mw loggingMiddleware) GetByID(ctx context.Context, id string) (postResponse Post, err error) {
 	defer func(begin time.Time) {
 		mw.logger.Log("method", "GetByID", "id", id, "took", time.Since(begin), "err", err)
 	}(time.Now())
 	return mw.next.GetByID(ctx, id)
 }
 
-func (mw loggingMiddleware) List(ctx context.Context) (posts []PostResponse, err error) {
+func (mw loggingMiddleware) List(ctx context.Context) (posts []Post, err error) {
 	defer func(begin time.Time) {
 		mw.logger.Log("method", "List", "took", time.Since(begin), "err", err)
 	}(time.Now())
 	return mw.next.List(ctx)
 }
 
-func (mw loggingMiddleware) Post(ctx context.Context, post Post) (PostResponse, error) {
+func (mw loggingMiddleware) Post(ctx context.Context, post Post) (Post, error) {
 	defer func(begin time.Time) {
 		mw.logger.Log("method", "Post", "took", time.Since(begin), "err", nil)
 	}(time.Now())
