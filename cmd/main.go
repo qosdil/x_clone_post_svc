@@ -10,27 +10,45 @@ import (
 	"syscall"
 	app "x_clone_post_svc"
 	configs "x_clone_post_svc/configs"
+	db "x_clone_post_svc/databases"
 
 	"github.com/go-kit/log"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var (
+	mongoClient *mongo.Client
+)
+
+func getDbRepo(repo string) app.Repository {
+	switch repo {
+	case "mongo":
+		// Set up MongoDB connection
+		mongoURI := configs.GetEnv("MONGODB_URI")
+		clientOptions := options.Client().ApplyURI(mongoURI)
+		var err error
+		mongoClient, err = mongo.Connect(context.TODO(), clientOptions)
+		if err != nil {
+			panic(err)
+		}
+		mongoDB := mongoClient.Database(configs.GetEnv("DB_NAME"))
+		return db.NewMongoRepository(mongoDB)
+	default:
+		return db.NewDummyRepository()
+	}
+}
+
 func main() {
 	// Load environment variables
 	configs.LoadEnv()
 
-	// Set up MongoDB connection
-	mongoURI := configs.GetEnv("MONGODB_URI")
-	clientOptions := options.Client().ApplyURI(mongoURI)
-	client, err := mongo.Connect(context.TODO(), clientOptions)
-	if err != nil {
-		panic(err)
+	dbRepo := configs.GetEnv("DB_REPO")
+	if dbRepo == "mongo" {
+		defer mongoClient.Disconnect(context.TODO())
 	}
-	defer client.Disconnect(context.TODO())
+	repo := getDbRepo(dbRepo)
 
-	db := client.Database(configs.GetEnv("DB_NAME"))
-	repo := app.NewMongoRepository(db)
 	var (
 		httpAddr = flag.String("http.addr", ":"+configs.GetEnv("PORT"), "HTTP listen address")
 	)
