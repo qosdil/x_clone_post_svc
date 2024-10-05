@@ -39,21 +39,21 @@ func codeFrom(err error) int {
 	}
 }
 
-func decodeGetRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
+func decodeGetByIDRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
 	vars := mux.Vars(r)
 	id, ok := vars["id"]
 	if !ok {
 		return nil, ErrBadRouting
 	}
-	return getRequest{ID: id}, nil
+	return getByIDRequest{ID: id}, nil
 }
 
-func decodeGetListRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
+func decodeListRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
 	return nil, nil
 }
 
-func decodePostRequest(ctx context.Context, r *http.Request) (request interface{}, err error) {
-	var req postRequest
+func decodeCreateRequest(ctx context.Context, r *http.Request) (request interface{}, err error) {
+	var req createRequest
 
 	// Extract the validated JWT user ID from auth middleware
 	userID, _ := ctx.Value("user_id").(string)
@@ -96,19 +96,19 @@ func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
 	v1Path := "/v1" + pathPrefix
 	r.Methods("GET").Path(v1Path + "/{id}").Handler(httptransport.NewServer(
 		e.GetByIDEndpoint,
-		decodeGetRequest,
+		decodeGetByIDRequest,
 		encodeResponse,
 		options...,
 	))
 	r.Methods("GET").Path(v1Path).Handler(httptransport.NewServer(
 		e.ListEndpoint,
-		decodeGetListRequest,
+		decodeListRequest,
 		encodeResponse,
 		options...,
 	))
 	r.Handle(v1Path, jwtAuthMiddleware(configs.GetEnv("JWT_SECRET"))(httptransport.NewServer(
-		e.PostEndpoint,
-		decodePostRequest,
+		e.CreateEndpoint,
+		decodeCreateRequest,
 		encodeResponse,
 		options...,
 	))).Methods("POST")
