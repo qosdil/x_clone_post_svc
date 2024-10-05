@@ -18,7 +18,7 @@ type loggingMiddleware struct {
 
 func (mw loggingMiddleware) GetByID(ctx context.Context, id string) (postResponse PostResponse, err error) {
 	defer func(begin time.Time) {
-		mw.logger.Log("method", "Get", "id", id, "took", time.Since(begin), "err", err)
+		mw.logger.Log("method", "GetByID", "id", id, "took", time.Since(begin), "err", err)
 	}(time.Now())
 	return mw.next.GetByID(ctx, id)
 }
