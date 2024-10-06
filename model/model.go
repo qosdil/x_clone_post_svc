@@ -1,4 +1,4 @@
-package x_clone_post_svc
+package model
 
 type Post struct {
 	ID        string `json:"id"`

@@ -10,7 +10,9 @@ import (
 	"syscall"
 	app "x_clone_post_svc"
 	configs "x_clone_post_svc/configs"
-	db "x_clone_post_svc/databases"
+	repository "x_clone_post_svc/repository"
+	db "x_clone_post_svc/repository/databases"
+	service "x_clone_post_svc/service"
 
 	"github.com/go-kit/log"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,7 +23,7 @@ var (
 	mongoClient *mongo.Client
 )
 
-func getDbRepo(repo string) app.Repository {
+func getDbRepo(repo string) repository.Repository {
 	switch repo {
 	case "mongo":
 		// Set up MongoDB connection
@@ -61,9 +63,9 @@ func main() {
 		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
 
-	var s app.Service
+	var s service.Service
 	{
-		s = app.NewService(repo)
+		s = service.NewService(repo)
 		s = app.LoggingMiddleware(logger)(s)
 	}
 

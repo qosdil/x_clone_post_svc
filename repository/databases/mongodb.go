@@ -4,14 +4,15 @@ import (
 	"context"
 	"errors"
 	"time"
-	app "x_clone_post_svc"
+	model "x_clone_post_svc/model"
+	repository "x_clone_post_svc/repository"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func NewMongoRepository(db *mongo.Database) app.Repository {
+func NewMongoRepository(db *mongo.Database) repository.Repository {
 	return &mongoRepository{
 		coll: db.Collection("posts"),
 	}
@@ -28,7 +29,7 @@ type mongoRepoPost struct {
 	UserID    primitive.ObjectID  `bson:"user_id"`
 }
 
-func (r *mongoRepository) Create(ctx context.Context, post app.Post) (app.Post, error) {
+func (r *mongoRepository) Create(ctx context.Context, post model.Post) (model.Post, error) {
 	post.CreatedAt = uint32(time.Now().Unix())
 	userObjectID, _ := primitive.ObjectIDFromHex(post.User.ID)
 	repoPost := mongoRepoPost{
@@ -38,14 +39,14 @@ func (r *mongoRepository) Create(ctx context.Context, post app.Post) (app.Post, 
 	}
 	result, err := r.coll.InsertOne(ctx, repoPost)
 	if err != nil {
-		return app.Post{}, err
+		return model.Post{}, err
 	}
 
 	post.ID = result.InsertedID.(primitive.ObjectID).Hex()
 	return post, nil
 }
 
-func (r *mongoRepository) Find(ctx context.Context) (posts []app.Post, err error) {
+func (r *mongoRepository) Find(ctx context.Context) (posts []model.Post, err error) {
 	cursor, err := r.coll.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, err
@@ -57,11 +58,11 @@ func (r *mongoRepository) Find(ctx context.Context) (posts []app.Post, err error
 		if err := cursor.Decode(&mongoRepoPost); err != nil {
 			return nil, err
 		}
-		posts = append(posts, app.Post{
+		posts = append(posts, model.Post{
 			ID:        mongoRepoPost.ID.Hex(),
 			Content:   mongoRepoPost.Content,
 			CreatedAt: mongoRepoPost.CreatedAt.T,
-			User: app.User{
+			User: model.User{
 				ID: mongoRepoPost.UserID.Hex(),
 
 				// TODO Change with the real one
@@ -77,7 +78,7 @@ func (r *mongoRepository) Find(ctx context.Context) (posts []app.Post, err error
 	return posts, nil
 }
 
-func (r *mongoRepository) FirstByID(ctx context.Context, id string) (post app.Post, err error) {
+func (r *mongoRepository) FirstByID(ctx context.Context, id string) (post model.Post, err error) {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return post, err
@@ -91,11 +92,11 @@ func (r *mongoRepository) FirstByID(ctx context.Context, id string) (post app.Po
 	if err != nil {
 		return post, err
 	}
-	return app.Post{
+	return model.Post{
 		ID:        mongoRepoPost.ID.Hex(),
 		Content:   mongoRepoPost.Content,
 		CreatedAt: mongoRepoPost.CreatedAt.T,
-		User: app.User{
+		User: model.User{
 			ID:       mongoRepoPost.UserID.Hex(),
 			Username: "username_" + mongoRepoPost.UserID.Hex(),
 		},

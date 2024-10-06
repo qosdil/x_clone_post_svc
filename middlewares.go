@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	model "x_clone_post_svc/model"
+	service "x_clone_post_svc/service"
 
 	"github.com/go-kit/log"
 	"github.com/golang-jwt/jwt"
@@ -12,35 +14,35 @@ import (
 )
 
 type loggingMiddleware struct {
-	next   Service
+	next   service.Service
 	logger log.Logger
 }
 
-func (mw loggingMiddleware) Create(ctx context.Context, post Post) (Post, error) {
+func (mw loggingMiddleware) Create(ctx context.Context, post model.Post) (model.Post, error) {
 	defer func(begin time.Time) {
 		mw.logger.Log("method", "Create", "took", time.Since(begin), "err", nil)
 	}(time.Now())
 	return mw.next.Create(ctx, post)
 }
 
-func (mw loggingMiddleware) GetByID(ctx context.Context, id string) (postResponse Post, err error) {
+func (mw loggingMiddleware) GetByID(ctx context.Context, id string) (postResponse model.Post, err error) {
 	defer func(begin time.Time) {
 		mw.logger.Log("method", "GetByID", "id", id, "took", time.Since(begin), "err", err)
 	}(time.Now())
 	return mw.next.GetByID(ctx, id)
 }
 
-func (mw loggingMiddleware) List(ctx context.Context) (posts []Post, err error) {
+func (mw loggingMiddleware) List(ctx context.Context) (posts []model.Post, err error) {
 	defer func(begin time.Time) {
 		mw.logger.Log("method", "List", "took", time.Since(begin), "err", err)
 	}(time.Now())
 	return mw.next.List(ctx)
 }
 
-type Middleware func(Service) Service
+type Middleware func(service.Service) service.Service
 
 func LoggingMiddleware(logger log.Logger) Middleware {
-	return func(next Service) Service {
+	return func(next service.Service) service.Service {
 		return &loggingMiddleware{
 			next:   next,
 			logger: logger,

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"x_clone_post_svc/configs"
+	service "x_clone_post_svc/service"
 
 	"github.com/go-kit/kit/transport"
 	httptransport "github.com/go-kit/kit/transport/http"
@@ -85,7 +86,7 @@ func encodeResponse(ctx context.Context, w http.ResponseWriter, response interfa
 	return json.NewEncoder(w).Encode(response)
 }
 
-func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
+func MakeHTTPHandler(s service.Service, logger log.Logger) http.Handler {
 	r := mux.NewRouter()
 	e := MakeServerEndpoints(s)
 	options := []httptransport.ServerOption{
