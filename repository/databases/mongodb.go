@@ -2,7 +2,6 @@ package databases
 
 import (
 	"context"
-	"errors"
 	"time"
 	model "x_clone_post_svc/model"
 	repository "x_clone_post_svc/repository"
@@ -81,13 +80,13 @@ func (r *mongoRepository) Find(ctx context.Context) (posts []model.Post, err err
 func (r *mongoRepository) FirstByID(ctx context.Context, id string) (post model.Post, err error) {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return post, err
+		return post, model.ErrBadIDFormat
 	}
 
 	var mongoRepoPost mongoRepoPost
 	err = r.coll.FindOne(ctx, bson.M{"_id": objectID}).Decode(&mongoRepoPost)
 	if err == mongo.ErrNoDocuments {
-		return post, errors.New("post not found")
+		return post, model.ErrNotFound
 	}
 	if err != nil {
 		return post, err

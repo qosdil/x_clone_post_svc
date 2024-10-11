@@ -33,6 +33,8 @@ type getByIDResponse struct {
 	Err  error      `json:"err,omitempty"`
 }
 
+func (r getByIDResponse) error() error { return r.Err }
+
 type listResponse struct {
 	Posts []model.Post `json:"posts,omitempty"`
 	Err   error        `json:"err,omitempty"`

@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 	"x_clone_post_svc/configs"
+	model "x_clone_post_svc/model"
 	service "x_clone_post_svc/service"
 
 	"github.com/go-kit/kit/transport"
@@ -19,10 +21,7 @@ const (
 )
 
 var (
-	ErrAlreadyExists   = errors.New("already exists")
-	ErrBadRouting      = errors.New("inconsistent mapping between route and handler (programmer error)")
-	ErrInconsistentIDs = errors.New("inconsistent IDs")
-	ErrNotFound        = errors.New("not found")
+	ErrBadRouting = errors.New("inconsistent mapping between route and handler (programmer error)")
 )
 
 type errorer interface {
@@ -31,9 +30,9 @@ type errorer interface {
 
 func codeFrom(err error) int {
 	switch err {
-	case ErrNotFound:
+	case model.ErrNotFound:
 		return http.StatusNotFound
-	case ErrAlreadyExists, ErrInconsistentIDs:
+	case model.ErrAlreadyExists, model.ErrBadIDFormat:
 		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
@@ -66,14 +65,28 @@ func decodeCreateRequest(ctx context.Context, r *http.Request) (request interfac
 	return req, nil
 }
 
+type errField struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	if err == nil {
 		panic("encodeError with nil error")
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(codeFrom(err))
+	code := err.Error()
+	message, ok := model.Errors[err.Error()]
+
+	// Set Code and Message with HTTP default statuses if not found in the map
+	if !ok {
+		message = strings.ToLower(http.StatusText(http.StatusInternalServerError))
+		code = strings.ReplaceAll(message, " ", "_")
+	}
+
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"error": err.Error(),
+		"error": errField{Code: code, Message: message},
 	})
 }
 
